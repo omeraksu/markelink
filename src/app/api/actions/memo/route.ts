@@ -17,53 +17,66 @@ import {
 } from "@solana/web3.js";
 
 // create the standard headers for this route (including CORS)
-const headers = createActionHeaders({
-  chainId: "devnet",
-  actionVersion: "2.2.1",
-});
+const headers = createActionHeaders({});
 
 export const GET = async (req: Request) => {
-  const payload: ActionGetResponse = {
-    title: "Donate to Alice",
-    icon: "<image-url>",
-    label: "Donate SOL",
-    description:
-      "Cybersecurity Enthusiast | Support my research with a donation.",
-    links: {
-      actions: [
-        {
-          label: "1 SOL", // button text
-          href: "/api/donate?amount=10",
-          // no `parameters` therefore not a text input field
-        },
-        {
-          label: "5 SOL", // button text
-          href: "/api/donate?amount=100",
-          // no `parameters` therefore not a text input field
-        },
-        {
-          label: "10 SOL", // button text
-          href: "/api/donate?amount=1000",
-          // no `parameters` therefore not a text input field
-        },
-        {
-          label: "Donate", // button text
-          href: "/api/donate?amount={amount}",
-          parameters: [
-            {
-              name: "amount", // field name
-              label: "Enter a custom SOL amount", // text input placeholder
-            },
-          ],
-        },
-      ],
-    },
-    type: "action",
-  };
+  try {
+    const requestUrl = new URL(req.url);
+    const { toPubkey } = validatedQueryParams(requestUrl);
 
-  return Response.json(payload, {
-    headers,
-  });
+    const baseHref = new URL(
+      `/api/actions/donate-sol?to=${toPubkey.toBase58()}`,
+      requestUrl.origin
+    ).toString();
+
+    const payload: ActionGetResponse = {
+      type: "action",
+      title: "Donate SOL to Alice",
+      icon: "https://ucarecdn.com/7aa46c85-08a4-4bc7-9376-88ec48bb1f43/-/preview/880x864/-/quality/smart/-/format/auto/",
+      description:
+        "Cybersecurity Enthusiast | Support my research with a donation.",
+      label: "Transfer", // this value will be ignored since `links.actions` exists
+      links: {
+        actions: [
+          {
+            label: "Send 1 SOL", // button text
+            href: `${baseHref}&amount=${"1"}`,
+          },
+          {
+            label: "Send 5 SOL", // button text
+            href: `${baseHref}&amount=${"5"}`,
+          },
+          {
+            label: "Send 10 SOL", // button text
+            href: `${baseHref}&amount=${"10"}`,
+          },
+          {
+            label: "Send SOL", // button text
+            href: `${baseHref}&amount={amount}`, // this href will have a text input
+            parameters: [
+              {
+                name: "amount", // parameter name in the `href` above
+                label: "Enter the amount of SOL to send", // placeholder of the text input
+                required: true,
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    return Response.json(payload, {
+      headers,
+    });
+  } catch (err) {
+    console.log(err);
+    let message = "An unknown error occurred";
+    if (typeof err == "string") message = err;
+    return new Response(message, {
+      status: 400,
+      headers,
+    });
+  }
 };
 
 // DO NOT FORGET TO INCLUDE THE `OPTIONS` HTTP METHOD
@@ -131,3 +144,6 @@ export const POST = async (req: Request) => {
     });
   }
 };
+function validatedQueryParams(requestUrl: URL): { toPubkey: any } {
+  throw new Error("Function not implemented.");
+}
