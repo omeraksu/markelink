@@ -1,7 +1,3 @@
-/**
- * Solana Actions Example
- */
-
 import {
   ActionPostResponse,
   createPostResponse,
@@ -10,6 +6,7 @@ import {
   ActionPostRequest,
   createActionHeaders,
 } from "@solana/actions";
+
 import {
   clusterApiUrl,
   ComputeBudgetProgram,
@@ -20,15 +17,48 @@ import {
 } from "@solana/web3.js";
 
 // create the standard headers for this route (including CORS)
-const headers = createActionHeaders();
+const headers = createActionHeaders({
+  chainId: "devnet",
+  actionVersion: "2.2.1",
+});
 
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
+    title: "Donate to Alice",
+    icon: "<image-url>",
+    label: "Donate SOL",
+    description:
+      "Cybersecurity Enthusiast | Support my research with a donation.",
+    links: {
+      actions: [
+        {
+          label: "1 SOL", // button text
+          href: "/api/donate?amount=10",
+          // no `parameters` therefore not a text input field
+        },
+        {
+          label: "5 SOL", // button text
+          href: "/api/donate?amount=100",
+          // no `parameters` therefore not a text input field
+        },
+        {
+          label: "10 SOL", // button text
+          href: "/api/donate?amount=1000",
+          // no `parameters` therefore not a text input field
+        },
+        {
+          label: "Donate", // button text
+          href: "/api/donate?amount={amount}",
+          parameters: [
+            {
+              name: "amount", // field name
+              label: "Enter a custom SOL amount", // text input placeholder
+            },
+          ],
+        },
+      ],
+    },
     type: "action",
-    title: "Actions Example - Simple On-chain Memo",
-    icon: new URL("/laser-eyes.png", new URL(req.url).origin).toString(),
-    description: "Send a message on-chain using a Memo",
-    label: "Send Memo",
   };
 
   return Response.json(payload, {
