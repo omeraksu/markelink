@@ -11,7 +11,7 @@ export const GET = async () => {
       // idempotent rule as the fallback
       {
         pathPattern: "/api/actions/**",
-        apiPath: "https://markelink-tau.vercel.app/api/donate?amount=10",
+        apiPath: "/api/actions/**",
       },
     ],
   };
